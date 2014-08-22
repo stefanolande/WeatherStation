@@ -8,9 +8,10 @@
 
 
 #define UPDATE_INTERVAL 900000L //intervallo di aggiornamento
+#define DEBUG false
 
 
-#define DHT22_PIN 2
+#define DHT22_PIN A3
 #define ALT 500
 
 //Sensore pressione
@@ -46,10 +47,10 @@ String strURL = "";
 
 void setup()
 {
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   if (!bmp.begin()) {
-    Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+    //Serial.println("Could not find a valid BMP085 sensor, check wiring!");
     while (1) {
     }
   }
@@ -57,35 +58,39 @@ void setup()
   delay(1000); //attendo un secondo
 
   if(!Ethernet.begin(mac)){
-    Serial.println("DHPC error");
+    //Serial.println("DHPC error");
     while(1);
   }
 
   //invio al pc il mio IP
-  Serial.print("My IP address: ");
-  Serial.println(Ethernet.localIP());
+  //Serial.print("My IP address: ");
+  //Serial.println(Ethernet.localIP());
+
+  if(DEBUG){
+    sendData();
+  }
 }
 
 void loop()
 {
-  
-    if (client.available()) {
+
+  if (client.available()) {
     char c = client.read();
     Serial.print(c);
   }
-  
-    // if there's no net connection, but there was one last time
+
+  // if there's no net connection, but there was one last time
   // through the loop, then stop the client:
   if (!client.connected() && lastConnected) {
-    Serial.println();
-    Serial.println("Disconnessione");
+    //Serial.println();
+    //Serial.println("Disconnessione");
     client.stop();
   }
-  
-  
-    // if you're not connected, and ten seconds have passed since
+
+
+  // if you're not connected, and ten seconds have passed since
   // your last connection, then connect again and send data:
-  if(!client.connected() && (millis() - lastConnectionTime > postingInterval)) {
+  if(!client.connected() && ((millis() - lastConnectionTime > postingInterval)) || !DEBUG) {
     sendData(); //carico i dati sul server
   }
 
@@ -122,7 +127,7 @@ void sendData(){
 
 
     // DISPLAY DATA
-    Serial.print("Umidita' (%): ");
+    /*Serial.print("Umidita' (%): ");
     Serial.println(umidita, 1);
     Serial.print("Temperatura (C): ");
     Serial.println(temp, 1);
@@ -130,13 +135,13 @@ void sendData(){
     Serial.println(puntoDiRugiada(temp, umidita), 1);
     Serial.print("QNH: ");
     Serial.println(qnh, 1);
-    
+
     Serial.println(server);
-    Serial.println();
+    Serial.println();*/
 
     if (client.connect(server, 80))
     {
-      Serial.println("Connesso");
+      //Serial.println("Connesso");
 
       char charBuf[7];
 
@@ -159,7 +164,7 @@ void sendData(){
       strURL+= charBuf; 
 
       strURL+=" HTTP/1.1";
-      
+
       //strURL = "GET /search?q=arduino HTTP/1.1";
 
       //invio la richiesta al server
@@ -171,28 +176,29 @@ void sendData(){
       lastConnectionTime = millis();
 
       delay(1000);
-      Serial.println(strURL);
+      //Serial.println(strURL);
     }
     else
     {
-      Serial.println("Errore Connessione");
-      Serial.println("Disconnessione");
+      //Serial.println("Errore Connessione");
+      //Serial.println("Disconnessione");
       client.stop();
     }
 
 
     break;
   case DHTLIB_ERROR_CHECKSUM: 
-    Serial.print("Checksum error,\t"); 
+    //Serial.print("Checksum error,\t"); 
     break;
   case DHTLIB_ERROR_TIMEOUT: 
-    Serial.print("Time out error,\t"); 
+    //Serial.print("Time out error,\t"); 
     break;
   default: 
-    Serial.print("Unknown error,\t"); 
+    //Serial.print("Unknown error,\t"); 
     break;
   } 
 }
+
 
 
 
