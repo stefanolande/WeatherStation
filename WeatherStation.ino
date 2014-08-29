@@ -161,6 +161,7 @@ void sendData(){
     }
 
     char charBuf[7];
+    String tempStr;
 
     if(errors.length() != 0){
       strURL = "GET /meteo/receive.php?err=" + errors + " HTTP/1.1";
@@ -171,19 +172,27 @@ void sendData(){
       strURL ="GET /meteo/receive.php?temp=";
 
       dtostrf(temp, 4, 1, charBuf);
-      strURL+= charBuf; 
+      tempStr = String(charBuf);
+      tempStr.trim();
+      strURL+= tempStr; 
 
       strURL+= "&hum=";
       dtostrf(umidita, 4, 1, charBuf);
-      strURL+= charBuf;
+      tempStr = String(charBuf);
+      tempStr.trim();
+      strURL+= tempStr; 
 
       strURL+= "&dewp=";
       dtostrf(puntoDiRugiada(temp, umidita), 4, 1, charBuf);
-      strURL+= charBuf;
+      tempStr = String(charBuf);
+      tempStr.trim();
+      strURL+= tempStr; 
 
       strURL+="&qnh=" ;
       dtostrf(qnh, 4, 1, charBuf);
-      strURL+= charBuf; 
+      tempStr = String(charBuf);
+      tempStr.trim();
+      strURL+= tempStr;  
 
       strURL+=" HTTP/1.1";
     }
