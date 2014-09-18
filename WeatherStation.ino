@@ -40,7 +40,7 @@ String errors = "";
 void setup()
 {
 
-  delay(30000); //attendo la connessione wifi
+  delay(60000); //waiting for the router
 
   if(LOG){
     Serial.begin(9600);
@@ -52,31 +52,31 @@ void setup()
     }
   }
 
-  delay(1000); //attendo un secondo
+  delay(1000);
 
-  if(!Ethernet.begin(mac)){
-    if(LOG){
+  //try to connect ethernet
+  while(!Ethernet.begin(mac)){
+#if LOG
       Serial.println("DHPC error");
-    }
-    while(1);
+#endif
+    delay(10000); //wait in case of conncetion failure
   }
 
-  //invio al pc il mio IP
-  if(LOG){
+#if LOG
     Serial.print("My IP address: ");
     Serial.println(Ethernet.localIP());
-  }
+#endif
 
-  if(DEBUG){
+#if DEBUG
     sendData(); 
     client.stop();
-  }
+#endif
 }
 
 void loop()
 {
 
-  if (!DEBUG) {
+#if !DEBUG
     sendData();
       
     //read the server response
@@ -87,13 +87,12 @@ void loop()
     
     client.stop();
     delay(UPDATE_INTERVAL);
-  }
+#endif
 }
 
 
 
-//calcolo il punto di rugiada
-double puntoDiRugiada(double temperatura, double umidita)
+double dewPoint(double temperatura, double umidita)
 {
   double a = 17.271;
   double b = 237.7;
@@ -119,46 +118,46 @@ void sendData(){
 
 
     // DISPLAY DATA
-    if(LOG){
+#if LOG
       Serial.print("Umidita' (%): ");
       Serial.println(umidita, 1);
       Serial.print("Temperatura (C): ");
       Serial.println(temp, 1);
       Serial.print("Rugiada (C): ");
-      Serial.println(puntoDiRugiada(temp, umidita), 1);
+      Serial.println(dewPoint(temp, umidita), 1);
       Serial.print("QNH: ");
       Serial.println(qnh, 1);
 
       Serial.println(server);
       Serial.println();
-    }
+#endif
 
     break;
   case DHTLIB_ERROR_CHECKSUM: 
     errors += "DHTChecksum"; 
-    if(LOG){
+#if LOG
       Serial.println("DHT Checksum error"); 
-    }
+#endif
     break;
   case DHTLIB_ERROR_TIMEOUT: 
     errors += "DHTTimeout"; 
-    if(LOG){
+#if LOG
       Serial.println("DHT Time out error "); 
-    }
+#endif
     break;
   default: 
     errors += "DHTUnknown"; 
-    if(LOG){
+#if LOG
       Serial.println("DHTUnknown"); 
-    }
+#endif
     break;
   } 
 
   if (client.connect(server, 80))
   {
-    if(LOG){
+#if LOG
       Serial.println("Connesso");
-    }
+#endif
 
     char charBuf[7];
     String tempStr;
@@ -183,7 +182,7 @@ void sendData(){
       strURL+= tempStr; 
 
       strURL+= "&dewp=";
-      dtostrf(puntoDiRugiada(temp, umidita), 4, 1, charBuf);
+      dtostrf(dewPoint(temp, umidita), 4, 1, charBuf);
       tempStr = String(charBuf);
       tempStr.trim();
       strURL+= tempStr; 
@@ -206,16 +205,16 @@ void sendData(){
 
 
     delay(1000);
-    if(LOG){
+#if LOG
       Serial.println(strURL);
-    }
+#endif
   }
   else
   {   
-    if(LOG){
+#if LOG
       Serial.println("Errore Connessione");
       Serial.println("Disconnessione");
-    }
+#endif
   }
 }
 
